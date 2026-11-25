@@ -3,104 +3,209 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prior-Art Search</title>
+<title>PriorArt Search | Find earlier patents for your idea</title>
+<meta name="description" content="Free prior-art search. Describe an invention in plain English and find earlier patents with the same features.">
 <style>
   :root {
-    --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e3e2dd;
-    --accent: #2c5d8f; --strong: #2e7d4f; --strong-bg: #e6f2ea; --partial: #a86a00; --partial-bg: #fbf0dc;
-    --none: #9a9a94; --none-bg: #f0efeb;
+    --bg: #ffffff; --surface: #f8fafc; --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --line-strong: #cbd5e1;
+    --accent: #1d4ed8; --accent-hover: #1e40af; --accent-soft: #eff6ff; --on-accent: #ffffff;
+    --ok: #047857; --ok-bg: #ecfdf5; --mid: #b45309; --mid-bg: #fffbeb; --no: #64748b; --no-bg: #f1f5f9;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #161615; --card: #20201e; --text: #ecebe6; --muted: #a09f99; --line: #34332f;
-      --accent: #7fb0e0; --strong: #7cc79a; --strong-bg: #1e3326; --partial: #e2b25a; --partial-bg: #3a2f1a;
-      --none: #77766f; --none-bg: #2a2a27; }
+    :root {
+      --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #94a3b8; --line: #1f2937; --line-strong: #334155;
+      --accent: #60a5fa; --accent-hover: #93c5fd; --accent-soft: #172554; --on-accent: #0b1120;
+      --ok: #34d399; --ok-bg: #052e22; --mid: #fbbf24; --mid-bg: #2d2006; --no: #94a3b8; --no-bg: #1e293b;
+    }
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 22px; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
-  textarea { width: 100%; min-height: 120px; padding: 12px; font: inherit; color: var(--text);
-    background: var(--card); border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
-  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 10px 0 18px; }
-  label { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; }
-  input[type=date], input[type=text] { font: inherit; padding: 5px 8px; color: var(--text);
-    background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
-  button { font: inherit; font-weight: 600; padding: 8px 18px; border: 0; border-radius: 6px;
-    background: var(--accent); color: #fff; cursor: pointer; }
-  @media (prefers-color-scheme: dark) { button { color: #10202f; } }
-  button:disabled { opacity: .6; cursor: wait; }
-  .examples { font-size: 13px; color: var(--muted); }
-  .examples a { color: var(--accent); cursor: pointer; margin-right: 10px; }
-  .notice { font-size: 13px; color: var(--muted); border-left: 3px solid var(--line); padding: 6px 10px; margin: 0 0 16px; }
-  .meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
-  .card h3 { margin: 0 0 4px; font-size: 16px; }
-  .card h3 a { color: var(--text); text-decoration: none; }
-  .card h3 a:hover { text-decoration: underline; }
-  .tags { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
-  .abs { margin: 0 0 8px; }
-  details { font-size: 14px; margin-top: 6px; }
-  summary { cursor: pointer; color: var(--accent); }
-  .claim { color: var(--muted); margin: 6px 0 0; }
-  .cov { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 10px;
-    background: var(--none-bg); color: var(--muted); margin-left: 6px; vertical-align: 2px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13.5px; }
-  td { border-top: 1px solid var(--line); padding: 6px 6px; vertical-align: top; }
-  td:first-child { width: 40%; }
-  .lv { font-size: 11.5px; font-weight: 700; padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
-  .lv.strong { color: var(--strong); background: var(--strong-bg); }
-  .lv.partial { color: var(--partial); background: var(--partial-bg); }
-  .lv.none { color: var(--none); background: var(--none-bg); }
-  .empty { color: var(--muted); text-align: center; padding: 30px; }
-  footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
-  footer p { margin: 0 0 8px; }
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); text-decoration: underline; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+  /* header */
+  header { border-bottom: 1px solid var(--line); background: var(--bg); }
+  header .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; color: var(--text); letter-spacing: -.01em; }
+  .brand:hover { text-decoration: none; color: var(--text); }
+  .mark { width: 26px; height: 26px; border-radius: 6px; background: var(--accent); position: relative; flex: none; }
+  .mark::before, .mark::after { content: ""; position: absolute; left: 6px; right: 6px; height: 2px; background: var(--on-accent); border-radius: 1px; }
+  .mark::before { top: 9px; } .mark::after { top: 15px; right: 10px; }
+  .beta { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 5px; letter-spacing: .03em; }
+  nav { margin-left: auto; display: flex; gap: 20px; font-size: 14px; }
+  nav a { color: var(--muted); }
+  nav a:hover { color: var(--text); text-decoration: none; }
+
+  /* search */
+  .hero { padding: 44px 0 8px; }
+  h1 { font-size: 30px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 10px; }
+  .lead { color: var(--muted); font-size: 16px; margin: 0 0 24px; max-width: 680px; }
+  .panel { border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg); box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  .panel:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea { display: block; width: 100%; min-height: 128px; padding: 14px 16px; border: 0; border-radius: 10px 10px 0 0;
+    font: inherit; font-size: 15.5px; color: var(--text); background: transparent; resize: vertical; outline: none; }
+  textarea::placeholder { color: var(--muted); }
+  .panel-foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 10px 12px 10px 16px; border-top: 1px solid var(--line); }
+  .examples { font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip { font: inherit; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+  .chip:hover { border-color: var(--line-strong); }
+  .btn { margin-left: auto; font: inherit; font-weight: 600; font-size: 14.5px; padding: 9px 22px; border: 0; border-radius: 7px;
+    background: var(--accent); color: var(--on-accent); cursor: pointer; }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled { opacity: .6; cursor: progress; }
+  .filters { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin: 14px 2px 0; font-size: 13.5px; color: var(--muted); }
+  .filters label { display: flex; align-items: center; gap: 8px; }
+  .filters input[type=date], .filters input[type=text] { font: inherit; font-size: 13.5px; padding: 5px 8px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; }
+  .filters input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+  .status { font-size: 13px; color: var(--muted); margin: 18px 2px 0; }
+
+  /* results */
+  #out { margin-top: 28px; }
+  .meta { font-size: 13px; color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .result { display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .rank { font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 2px; text-align: right; }
+  .result h3 { margin: 0; font-size: 16.5px; line-height: 1.35; font-weight: 600; }
+  .result h3 a { color: var(--accent); }
+  .facts { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; color: var(--muted); margin: 4px 0 8px; }
+  .facts .pn { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .abs { margin: 0; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .abs.open { display: block; }
+  .match { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 4px; margin-left: 2px;
+    background: var(--no-bg); color: var(--no); }
+  .match.hi { background: var(--ok-bg); color: var(--ok); }
+  .match.md { background: var(--mid-bg); color: var(--mid); }
+  .tools { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 10px; }
+  .tool { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+  .tool:hover { text-decoration: underline; }
+  .tool[aria-expanded=true]::after { content: " \25B4"; }
+  .tool[aria-expanded=false]::after { content: " \25BE"; }
+  .drawer { margin-top: 10px; font-size: 14px; }
+  .drawer[hidden] { display: none; }
+  .drawer p { margin: 0; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px 8px; border-bottom: 1px solid var(--line-strong); }
+  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.f { width: 38%; }
+  td.l { width: 92px; white-space: nowrap; }
+  .lv { font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 4px; }
+  .lv.strong { color: var(--ok); background: var(--ok-bg); }
+  .lv.partial { color: var(--mid); background: var(--mid-bg); }
+  .lv.none { color: var(--no); background: var(--no-bg); }
+  .empty { color: var(--muted); text-align: center; padding: 36px 0; }
+
+  /* info sections */
+  .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin: 64px 0 0; padding: 32px 0 0; border-top: 1px solid var(--line); }
+  .how h4 { margin: 0 0 6px; font-size: 14.5px; }
+  .how p { margin: 0; font-size: 14px; color: var(--muted); }
+  .step { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; margin-right: 8px; }
+  footer { margin-top: 56px; background: var(--surface); border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding-top: 32px; padding-bottom: 32px; }
+  footer h5 { margin: 0 0 6px; font-size: 13px; color: var(--text); }
+  footer p { margin: 0; }
+  .legal { grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid var(--line); }
+  @media (max-width: 720px) {
+    .hero { padding-top: 28px; }
+    h1 { font-size: 24px; }
+    nav { gap: 14px; }
+    .how, footer .wrap { grid-template-columns: 1fr; gap: 20px; }
+    .btn { width: 100%; }
+    .result { grid-template-columns: 22px 1fr; gap: 0 6px; }
+    .rank { text-align: left; }
+    thead { display: none; }
+    tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    td, td.f, td.l { display: block; width: auto; border: 0; padding: 2px 0; }
+    td.f { font-weight: 600; }
+  }
+  @media (max-width: 480px) { nav { display: none; } }
+  .result > div { min-width: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
-<main>
-  <h1>Prior-Art Search <span style="font-weight:400;color:var(--muted)">prototype</span></h1>
-  <p class="sub" id="info">Loading…</p>
+<header>
+  <div class="wrap">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true"></span>PriorArt Search <span class="beta">BETA</span></a>
+    <nav><a href="#how">How it works</a><a href="#about">About</a></nav>
+  </div>
+</header>
 
-  <textarea id="q" placeholder="Describe your idea in plain English. Separate features with sentences or new lines, e.g.&#10;A coffee machine that grinds beans on demand.&#10;The grinder is weighed by a load cell to dose exactly.&#10;The machine adjusts grind size based on extraction time."></textarea>
-  <div class="examples">Examples:
-    <a data-ex="A coffee machine that grinds beans on demand.
-A load cell weighs the ground coffee to dose it exactly.
-The grind size is adjusted automatically based on measured extraction time.">smart coffee grinder</a>
-    <a data-ex="A portable blender powered by a rechargeable battery.
+<main class="wrap">
+  <section class="hero">
+    <h1>Search patents by describing your invention</h1>
+    <p class="lead">Write what your invention does in plain English. You get the closest earlier patents and a
+      feature-by-feature comparison with their main claim.</p>
+
+    <div class="panel">
+      <textarea id="q" aria-label="Describe your invention" placeholder="Describe one feature per sentence, for example:&#10;A coffee machine that grinds beans on demand.&#10;A load cell weighs the ground coffee for exact dosing.&#10;The grind size is adjusted based on the measured extraction time."></textarea>
+      <div class="panel-foot">
+        <div class="examples">Try:
+          <button class="chip" data-ex="A coffee machine that grinds beans on demand.
+A load cell weighs the ground coffee for exact dosing.
+The grind size is adjusted automatically based on the measured extraction time.">Coffee grinder</button>
+          <button class="chip" data-ex="A portable blender powered by a rechargeable battery.
 The blender jar doubles as a drinking bottle with a lid.
-The motor only starts when the jar is correctly locked onto the base.">portable blender</a>
-    <a data-ex="A cooking pot with a built-in temperature sensor in the lid.
-The sensor wirelessly sends the temperature to a smartphone app.
-The app tells the user when to lower the heat.">smart pot lid</a>
-  </div>
-  <div class="row">
-    <label>Published before <input type="date" id="before" title="Your filing / priority date: only earlier documents count as prior art"></label>
-    <label>Offices <input type="text" id="countries" placeholder="all, or e.g. US,EP" size="12"></label>
-    <label><input type="checkbox" id="rerank" checked> patent reranker</label>
-    <button id="go">Search</button>
-  </div>
-  <p class="notice">Search aid, not legal advice. Covers only the indexed sample of documents and only English text; "nothing found" does not mean your idea is new.</p>
+The motor only starts when the jar is correctly locked onto the base.">Portable blender</button>
+          <button class="chip" data-ex="A cooking pot with a temperature sensor built into the lid.
+The sensor sends the temperature wirelessly to a smartphone app.
+The app tells the user when to lower the heat.">Smart pot lid</button>
+        </div>
+        <button class="btn" id="go">Search</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <label>Published before <input type="date" id="before" title="Your filing or priority date. Only earlier documents count as prior art."></label>
+      <label>Patent offices <input type="text" id="countries" placeholder="All, or e.g. US, EP" size="13"></label>
+      <label title="Re-ranks the top results with a model trained on examiner citations. Slower, more accurate."><input type="checkbox" id="rerank" checked> Precise ranking</label>
+    </div>
+    <p class="status" id="info">Connecting to the search server…</p>
+  </section>
+
   <div id="out"></div>
-  <footer>
-    <p><b>Privacy.</b> Your description is sent over an encrypted connection to the search server, used
-    only to run that search, and is not stored or logged. No cookies, no accounts, no tracking. Even so,
-    as with any online service: don't paste anything you must keep strictly confidential before you file.</p>
-    <p><b>About.</b> A free, experimental tool. Searches run on small open models on our own computer –
-    no paid AI service sees your text. Data: Google Patents Public Data (IFI CLAIMS Patent Services and
-    Google), CC BY 4.0. Results can be incomplete or wrong; always check the original documents.</p>
-  </footer>
+
+  <section class="how" id="how">
+    <div><h4><span class="step">1</span>Describe</h4>
+      <p>Write your idea in a few sentences. Each sentence is treated as one feature.</p></div>
+    <div><h4><span class="step">2</span>Search</h4>
+      <p>Your text is matched against titles, abstracts and claims, by keywords and by meaning, then
+        re-ranked with a model trained on patent examiners' citations.</p></div>
+    <div><h4><span class="step">3</span>Compare</h4>
+      <p>For the top results, each of your features is matched to the closest part of the patent's first
+        claim: strong match, partial match or not found.</p></div>
+  </section>
 </main>
+
+<footer id="about">
+  <div class="wrap">
+    <div><h5>About</h5>
+      <p>A free, independent search tool in beta. The current index covers kitchen appliances and equipment
+        (CPC class A47J). More technical fields will follow.</p></div>
+    <div><h5>Privacy</h5>
+      <p>Your text is sent over an encrypted connection, used only to run your search, and never stored or
+        logged. No accounts, no cookies, no tracking, and no third-party AI service sees your text.</p></div>
+    <div><h5>Data</h5>
+      <p>Patent data from Google Patents Public Data by IFI CLAIMS Patent Services and Google, licensed under
+        CC BY 4.0. Links open the full documents on Google Patents.</p></div>
+    <p class="legal">This tool is a search aid, not legal advice. Coverage is limited to the indexed documents
+      with English text, so a search without close results does not mean an idea is new. Treat anything you must
+      keep confidential before filing with the same care as with any online service.</p>
+  </div>
+</footer>
+
 <script>
 const $ = s => document.querySelector(s);
-const esc = s => (s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const fmtDate = n => n ? String(n).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "–";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate = n => n ? String(n).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "unknown";
+const clip = (s, n = 280) => !s ? "" : s.length <= n ? s : s.slice(0, s.lastIndexOf(" ", n) > n * 0.7 ? s.lastIndexOf(" ", n) : n) + " …";
 const gp = id => "https://patents.google.com/patent/" + id.replace(/-/g, "") + "/en";
 
 // Where is the search server? On GitHub Pages, api.json holds the current tunnel address
 // (rewritten by scripts/run_public.py whenever the tunnel restarts). Served locally, it is this server.
-const OFFLINE = '<p class="empty">The search server is offline right now – please try again later.</p>';
+const OFFLINE = '<p class="empty">The search server is offline at the moment. Please try again later.</p>';
 let API = "";
 const ready = (async () => {
   try {
@@ -109,56 +214,75 @@ const ready = (async () => {
   } catch (e) { /* no api.json: same-origin server */ }
   try {
     const i = await (await fetch(API + "/api/info")).json();
-    $("#info").textContent = `${i.n_docs.toLocaleString()} patent families in CPC ${i.cls} (kitchen equipment), published ${fmtDate(i.from).slice(0,4)}–${fmtDate(i.to).slice(0,4)} · runs on small local models, no AI API`;
-  } catch (e) { $("#info").textContent = "Search server offline."; $("#out").innerHTML = OFFLINE; }
+    $("#info").textContent = `Searching ${i.n_docs.toLocaleString("en-US")} patent families in kitchen appliances and equipment (CPC A47J), published ${String(i.from).slice(0,4)} to ${String(i.to).slice(0,4)}.`;
+  } catch (e) { $("#info").textContent = "The search server is offline at the moment."; }
 })();
-document.querySelectorAll("[data-ex]").forEach(a => a.onclick = () => { $("#q").value = a.dataset.ex; run(); });
+
+document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#q").value = b.dataset.ex; run(); });
 $("#go").onclick = run;
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run(); });
+$("#out").addEventListener("click", e => {
+  const t = e.target.closest(".tool");
+  if (!t) return;
+  const d = document.getElementById(t.dataset.for), open = t.getAttribute("aria-expanded") === "true";
+  t.setAttribute("aria-expanded", String(!open));
+  if (d.classList.contains("abs")) d.classList.toggle("open", !open); else d.hidden = open;
+});
 
 async function run() {
   const q = $("#q").value.trim();
-  if (q.length < 3) return;
+  if (q.length < 3) { $("#q").focus(); return; }
   const body = { q, k: 20, rerank: $("#rerank").checked };
   if ($("#before").value) body.before = +$("#before").value.replace(/-/g, "");
-  if ($("#countries").value.trim()) body.countries = $("#countries").value.trim();
-  $("#go").disabled = true; $("#out").innerHTML = '<p class="empty">Searching…</p>';
+  if ($("#countries").value.trim()) body.countries = $("#countries").value.replace(/\s+/g, "");
+  $("#go").disabled = true; $("#go").textContent = "Searching…";
+  $("#out").innerHTML = '<p class="empty">Searching…</p>';
   await ready;
   try {
     // POST, so the description never ends up in URLs, browser history or server logs.
     const r = await fetch(API + "/api/search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!r.ok) {
-      let msg = `HTTP ${r.status}`;
-      try { const j = await r.json(); msg = typeof j.detail === "string" ? j.detail : "Please check your input."; } catch (e) {}
+      let msg = `Something went wrong (HTTP ${r.status}).`;
+      try { const j = await r.json(); msg = typeof j.detail === "string" ? j.detail : "Please check your input and try again."; } catch (e) {}
       throw new Error(msg);
     }
     render(await r.json());
   } catch (e) {
     $("#out").innerHTML = e instanceof TypeError ? OFFLINE : `<p class="empty">${esc(e.message)}</p>`;
   }
-  $("#go").disabled = false;
+  $("#go").disabled = false; $("#go").textContent = "Search";
 }
 
 function render(res) {
   if (!res.results.length) { $("#out").innerHTML = '<p class="empty">No results with these filters.</p>'; return; }
-  let h = `<div class="meta">${res.results.length} closest families · ${res.ms} ms</div>`;
+  let h = `<div class="meta">${res.results.length} closest patent families · ${(res.ms / 1000).toFixed(1)} s</div>`;
   for (const d of res.results) {
-    const f = d.features;
-    const cov = f ? `<span class="cov" title="Share of your features found in claim 1">${Math.round(f.coverage*100)}% of features in claim 1</span>` : "";
-    h += `<div class="card">
-      <h3>${d.rank}. <a href="${esc(gp(d.id))}" target="_blank" rel="noopener">${esc(d.title) || esc(d.id)}</a>${cov}</h3>
-      <div class="tags"><span>${esc(d.id)}</span><span>first published ${fmtDate(d.first_pub)}</span>
-        <span>priority ${fmtDate(d.prio_date)}</span>${d.assignee.length ? `<span>${esc(d.assignee.join(", "))}</span>` : ""}
-        <span>${d.n_members} family member${d.n_members>1?"s":""}</span></div>
-      <p class="abs">${esc(d.abstract)}</p>`;
+    const f = d.features, n = d.rank;
+    let badge = "";
     if (f) {
-      h += `<details${d.rank <= 3 ? " open" : ""}><summary>Your features vs. claim 1</summary><table>`;
-      for (const row of f.rows)
-        h += `<tr><td>${esc(res.features[row.feature])}</td><td><span class="lv ${row.level}">${row.level === "none" ? "not found" : row.level}</span> ${esc(row.element || "")}</td></tr>`;
-      h += `</table></details>`;
+      const pct = Math.round(f.coverage * 100);
+      badge = ` <span class="match ${pct >= 67 ? "hi" : pct >= 34 ? "md" : ""}" title="How many of your features were found in claim 1">${pct}% feature match</span>`;
     }
-    if (d.claim1) h += `<details><summary>Claim 1</summary><p class="claim">${esc(d.claim1)}</p></details>`;
-    h += `<details><summary>Family & classification</summary><p class="claim">${esc(d.members.join(", "))}${d.n_members > d.members.length ? " …" : ""}<br>CPC: ${esc(d.cpc.join(", "))}</p></details></div>`;
+    h += `<article class="result"><div class="rank">${n}</div><div>
+      <h3><a href="${esc(gp(d.id))}" target="_blank" rel="noopener">${esc(d.title) || esc(d.id)}</a>${badge}</h3>
+      <div class="facts"><span class="pn">${esc(d.id)}</span><span>Published ${fmtDate(d.first_pub)}</span>
+        <span>Priority ${fmtDate(d.prio_date)}</span>${d.assignee.length ? `<span>${esc(d.assignee.join(", "))}</span>` : ""}
+        <span>${d.n_members} family member${d.n_members > 1 ? "s" : ""}</span></div>
+      <p class="abs" id="a${n}">${esc(d.abstract)}</p>
+      <div class="tools">
+        <button class="tool" data-for="a${n}" aria-expanded="false">Full abstract</button>`;
+    if (f) h += `<button class="tool" data-for="f${n}" aria-expanded="${n <= 3}">Feature comparison</button>`;
+    if (d.claim1) h += `<button class="tool" data-for="c${n}" aria-expanded="false">Claim 1</button>`;
+    h += `<button class="tool" data-for="m${n}" aria-expanded="false">Family and classification</button></div>`;
+    if (f) {
+      h += `<div class="drawer" id="f${n}"${n <= 3 ? "" : " hidden"}><table><thead><tr><th>Your feature</th><th>Match</th><th>Closest text in claim 1</th></tr></thead><tbody>`;
+      for (const row of f.rows)
+        h += `<tr><td class="f">${esc(res.features[row.feature])}</td><td class="l"><span class="lv ${row.level}">${row.level === "none" ? "Not found" : row.level === "strong" ? "Strong" : "Partial"}</span></td><td>${esc(clip(row.element))}</td></tr>`;
+      h += `</tbody></table></div>`;
+    }
+    if (d.claim1) h += `<div class="drawer" id="c${n}" hidden><p>${esc(d.claim1)}</p></div>`;
+    h += `<div class="drawer" id="m${n}" hidden><p>Family: ${esc(d.members.join(", "))}${d.n_members > d.members.length ? " …" : ""}<br>CPC: ${esc(d.cpc.join(", "))}</p></div>`;
+    h += `</div></article>`;
   }
   $("#out").innerHTML = h;
 }
