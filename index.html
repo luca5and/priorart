@@ -146,12 +146,15 @@
           <button class="chip" data-ex="A coffee machine that grinds beans on demand.
 A load cell weighs the ground coffee for exact dosing.
 The grind size is adjusted automatically based on the measured extraction time.">Coffee grinder</button>
-          <button class="chip" data-ex="A portable blender powered by a rechargeable battery.
-The blender jar doubles as a drinking bottle with a lid.
-The motor only starts when the jar is correctly locked onto the base.">Portable blender</button>
-          <button class="chip" data-ex="A cooking pot with a temperature sensor built into the lid.
-The sensor sends the temperature wirelessly to a smartphone app.
-The app tells the user when to lower the heat.">Smart pot lid</button>
+          <button class="chip" data-ex="A retractable dog leash with a cord wound on a spring-loaded reel in a handle.
+A brake button on the handle locks the cord at the current length.
+The handle contains a light that switches on automatically in the dark.">Dog leash</button>
+          <button class="chip" data-ex="A ratchet screwdriver with interchangeable bits stored inside the handle.
+A switch on the handle selects forward, reverse or locked rotation.
+The bit holder is magnetic so that bits and screws stay in place.">Ratchet screwdriver</button>
+          <button class="chip" data-ex="A resealable food package made of flexible plastic film.
+The package has a zipper closure along its top edge.
+A one-way valve lets gas escape without letting air in.">Resealable bag</button>
         </div>
         <button class="btn" id="go">Search</button>
       </div>
@@ -182,8 +185,9 @@ The app tells the user when to lower the heat.">Smart pot lid</button>
 <footer id="about">
   <div class="wrap">
     <div><h5>About</h5>
-      <p>A free, independent search tool in beta. The current index covers kitchen appliances and equipment
-        (CPC class A47J). More technical fields will follow.</p></div>
+      <p>A free, independent search tool in beta. The current index covers consumer products: household
+        and kitchen, personal items, sports, toys, pets and fishing, hand tools and packaging (CPC A47, A45,
+        A63B, A63H, A01K, B25B–H, B26B, B65D). More technical fields will follow.</p></div>
     <div><h5>Privacy</h5>
       <p>Your text is sent over an encrypted connection, used only to run your search, and never stored or
         logged. No accounts, no cookies, no tracking, and no third-party AI service sees your text.</p></div>
@@ -214,7 +218,7 @@ const ready = (async () => {
   } catch (e) { /* no api.json: same-origin server */ }
   try {
     const i = await (await fetch(API + "/api/info")).json();
-    $("#info").textContent = `Searching ${i.n_docs.toLocaleString("en-US")} patent families in kitchen appliances and equipment (CPC A47J), published ${String(i.from).slice(0,4)} to ${String(i.to).slice(0,4)}.`;
+    $("#info").textContent = `Searching ${i.n_docs.toLocaleString("en-US")} patent families in ${i.field || "CPC " + i.cls}, published ${String(i.from).slice(0,4)} to ${String(i.to).slice(0,4)}.`;
   } catch (e) { $("#info").textContent = "The search server is offline at the moment."; }
 })();
 
