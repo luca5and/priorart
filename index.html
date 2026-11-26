@@ -10,12 +10,14 @@
     --bg: #ffffff; --surface: #f8fafc; --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --line-strong: #cbd5e1;
     --accent: #1d4ed8; --accent-hover: #1e40af; --accent-soft: #eff6ff; --on-accent: #ffffff;
     --ok: #047857; --ok-bg: #ecfdf5; --mid: #b45309; --mid-bg: #fffbeb; --no: #64748b; --no-bg: #f1f5f9;
+    --panel-line: #93b4f0; --panel-shadow: 0 8px 28px -10px rgba(29,78,216,.28);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #94a3b8; --line: #1f2937; --line-strong: #334155;
       --accent: #60a5fa; --accent-hover: #93c5fd; --accent-soft: #172554; --on-accent: #0b1120;
       --ok: #34d399; --ok-bg: #052e22; --mid: #fbbf24; --mid-bg: #2d2006; --no: #94a3b8; --no-bg: #1e293b;
+      --panel-line: #2b4a8a; --panel-shadow: 0 8px 28px -12px rgba(0,0,0,.6);
     }
   }
   * { box-sizing: border-box; }
@@ -43,16 +45,28 @@
   .hero { padding: 44px 0 8px; }
   h1 { font-size: 30px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 10px; }
   .lead { color: var(--muted); font-size: 16px; margin: 0 0 24px; max-width: 680px; }
-  .panel { border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg); box-shadow: 0 1px 2px rgba(15,23,42,.04); }
-  .panel:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  textarea { display: block; width: 100%; min-height: 128px; padding: 14px 16px; border: 0; border-radius: 10px 10px 0 0;
-    font: inherit; font-size: 15.5px; color: var(--text); background: transparent; resize: vertical; outline: none; }
-  textarea::placeholder { color: var(--muted); }
-  .panel-foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 10px 12px 10px 16px; border-top: 1px solid var(--line); }
+  .qhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 2px 8px; }
+  .qlabel { font-weight: 700; font-size: 15px; }
+  .kbd-hint { font-size: 12.5px; color: var(--muted); }
+  .panel { border: 2px solid var(--panel-line); border-radius: 12px; background: var(--bg); box-shadow: var(--panel-shadow); }
+  .panel:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), var(--panel-shadow); }
+  .qbox { position: relative; }
+  textarea { display: block; width: 100%; min-height: 160px; max-height: 70vh; padding: 16px 18px; border: 0; border-radius: 10px 10px 0 0;
+    font: inherit; font-size: 16px; line-height: 1.55; color: var(--text); background: transparent; resize: none; outline: none; }
+  /* example text shown in the empty box (instead of a placeholder, so it can be styled and always fits) */
+  .ph { position: absolute; top: 0; left: 0; right: 0; padding: 16px 18px 18px; pointer-events: none; font-size: 16px; line-height: 1.55; color: var(--muted); }
+  .ph[hidden] { display: none; }
+  .ph-head { font-size: 13.5px; color: var(--text); margin-bottom: 10px; }
+  .ph-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent);
+    background: var(--accent-soft); border-radius: 4px; padding: 1px 7px; margin-right: 8px; vertical-align: 1px; }
+  .ph-ex { border-left: 3px solid var(--line-strong); padding-left: 12px; font-style: italic; }
+  .ph-ex span { display: block; margin-bottom: 3px; }
+  .ph-tip { font-size: 13px; margin-top: 10px; }
+  .panel-foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 12px 12px 12px 18px; border-top: 1px solid var(--line); background: var(--surface); border-radius: 0 0 10px 10px; }
   .examples { font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .chip { font: inherit; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
-  .chip:hover { border-color: var(--line-strong); }
-  .btn { margin-left: auto; font: inherit; font-weight: 600; font-size: 14.5px; padding: 9px 22px; border: 0; border-radius: 7px;
+  .chip { font: inherit; font-size: 13px; color: var(--text); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .btn { margin-left: auto; font: inherit; font-weight: 600; font-size: 15px; padding: 11px 30px; border: 0; border-radius: 8px;
     background: var(--accent); color: var(--on-accent); cursor: pointer; }
   .btn:hover { background: var(--accent-hover); }
   .btn:disabled { opacity: .6; cursor: progress; }
@@ -114,6 +128,7 @@
     nav { gap: 14px; }
     .how, footer .wrap { grid-template-columns: 1fr; gap: 20px; }
     .btn { width: 100%; }
+    .kbd-hint { display: none; }
     .result { grid-template-columns: 22px 1fr; gap: 0 6px; }
     .rank { text-align: left; }
     thead { display: none; }
@@ -139,10 +154,25 @@
     <p class="lead">Write what your invention does in plain English. You get the closest earlier patents and a
       feature-by-feature comparison with their main claim.</p>
 
+    <div class="qhead">
+      <label class="qlabel" for="q">Your invention</label>
+      <span class="kbd-hint">Ctrl + Enter to search</span>
+    </div>
     <div class="panel">
-      <textarea id="q" aria-label="Describe your invention" placeholder="Describe one feature per sentence, for example:&#10;A coffee machine that grinds beans on demand.&#10;A load cell weighs the ground coffee for exact dosing.&#10;The grind size is adjusted based on the measured extraction time."></textarea>
+      <div class="qbox">
+        <textarea id="q" aria-describedby="ph" spellcheck="true"></textarea>
+        <div class="ph" id="ph">
+          <div class="ph-head"><span class="ph-tag">Example</span>Start typing to replace it with your own invention.</div>
+          <div class="ph-ex">
+            <span>A coffee machine that grinds beans on demand.</span>
+            <span>A load cell weighs the ground coffee for exact dosing.</span>
+            <span>The grind size is adjusted automatically based on the measured extraction time.</span>
+          </div>
+          <div class="ph-tip">Tip: write one feature per sentence. Three to six sentences work best.</div>
+        </div>
+      </div>
       <div class="panel-foot">
-        <div class="examples">Try:
+        <div class="examples">Or try an example:
           <button class="chip" data-ex="A coffee machine that grinds beans on demand.
 A load cell weighs the ground coffee for exact dosing.
 The grind size is adjusted automatically based on the measured extraction time.">Coffee grinder</button>
@@ -222,7 +252,17 @@ const ready = (async () => {
   } catch (e) { $("#info").textContent = "The search server is offline at the moment."; }
 })();
 
-document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#q").value = b.dataset.ex; run(); });
+// The box grows to fit the example text (when empty) or the typed text, so nothing is hidden behind a scrollbar.
+function fitBox() {
+  const q = $("#q"), ph = $("#ph");
+  ph.hidden = q.value.length > 0;
+  q.style.height = "auto";
+  q.style.height = Math.max(q.value ? q.scrollHeight : ph.offsetHeight, 160) + "px";
+}
+$("#q").addEventListener("input", fitBox);
+window.addEventListener("resize", fitBox);
+fitBox();
+document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#q").value = b.dataset.ex; fitBox(); run(); });
 $("#go").onclick = run;
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run(); });
 $("#out").addEventListener("click", e => {
