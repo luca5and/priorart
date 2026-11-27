@@ -46,6 +46,14 @@
   .hero { padding: 44px 0 8px; }
   h1 { font-size: 30px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 10px; }
   .lead { color: var(--muted); font-size: 16px; margin: 0 0 24px; max-width: 680px; }
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: 0 0 20px; overflow-x: auto; scrollbar-width: none; }
+  .tabs[hidden] { display: none; }
+  .tab { font: inherit; font-size: 15px; font-weight: 600; color: var(--muted); background: none; border: 0;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 10px 14px; cursor: pointer; white-space: nowrap; }
+  .tab:first-child { padding-left: 2px; }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected=true] { color: var(--text); border-bottom-color: var(--text); }
+  .tab .n { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 7px; }
   .qhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 2px 8px; }
   .qlabel { font-weight: 700; font-size: 15px; }
   .kbd-hint { font-size: 12.5px; color: var(--muted); }
@@ -130,6 +138,8 @@
     .how, footer .wrap { grid-template-columns: 1fr; gap: 20px; }
     .btn { width: 100%; }
     .kbd-hint { display: none; }
+    .tab { font-size: 14px; padding: 9px 9px; }
+    .tab .n { display: none; }
     .result { grid-template-columns: 22px 1fr; gap: 0 6px; }
     .rank { text-align: left; }
     thead { display: none; }
@@ -175,6 +185,8 @@
     <p class="lead">Write what your invention does in plain English. You get the closest earlier patents and a
       feature-by-feature comparison with their main claim.</p>
 
+    <div class="tabs" id="tabs" role="tablist" aria-label="Technical field" hidden></div>
+
     <div class="qhead">
       <label class="qlabel" for="q">Your invention</label>
       <span class="kbd-hint">Ctrl + Enter to search</span>
@@ -184,29 +196,12 @@
         <textarea id="q" aria-describedby="ph" spellcheck="true"></textarea>
         <div class="ph" id="ph">
           <div class="ph-head"><span class="ph-tag">Example</span>Start typing to replace it with your own invention.</div>
-          <div class="ph-ex">
-            <span>A coffee machine that grinds beans on demand.</span>
-            <span>A load cell weighs the ground coffee for exact dosing.</span>
-            <span>The grind size is adjusted automatically based on the measured extraction time.</span>
-          </div>
+          <div class="ph-ex" id="ph-ex"></div>
           <div class="ph-tip">Tip: write one feature per sentence. Three to six sentences work best.</div>
         </div>
       </div>
       <div class="panel-foot">
-        <div class="examples">Or try an example:
-          <button class="chip" data-ex="A coffee machine that grinds beans on demand.
-A load cell weighs the ground coffee for exact dosing.
-The grind size is adjusted automatically based on the measured extraction time.">Coffee grinder</button>
-          <button class="chip" data-ex="A retractable dog leash with a cord wound on a spring-loaded reel in a handle.
-A brake button on the handle locks the cord at the current length.
-The handle contains a light that switches on automatically in the dark.">Dog leash</button>
-          <button class="chip" data-ex="A ratchet screwdriver with interchangeable bits stored inside the handle.
-A switch on the handle selects forward, reverse or locked rotation.
-The bit holder is magnetic so that bits and screws stay in place.">Ratchet screwdriver</button>
-          <button class="chip" data-ex="A resealable food package made of flexible plastic film.
-The package has a zipper closure along its top edge.
-A one-way valve lets gas escape without letting air in.">Resealable bag</button>
-        </div>
+        <div class="examples">Or try an example: <span id="chips" style="display:contents"></span></div>
         <button class="btn" id="go">Search</button>
       </div>
     </div>
@@ -273,9 +268,58 @@ const ready = (async () => {
   } catch (e) { /* no api.json: same-origin server */ }
   try {
     const i = await (await fetch(API + "/api/info")).json();
-    $("#info").textContent = `Searching ${i.n_docs.toLocaleString("en-US")} patent families in ${i.field || "CPC " + i.cls}, published ${String(i.from).slice(0,4)} to ${String(i.to).slice(0,4)}.`;
+    FIELDS = i.fields || [{ key: i.cls, tab: i.cls, field: i.field || "CPC " + i.cls, n_docs: i.n_docs, from: i.from, to: i.to }];
+    if (FIELDS.length > 1) {
+      $("#tabs").innerHTML = FIELDS.map(f => `<button class="tab" role="tab" data-key="${esc(f.key)}">${esc(f.tab)}` +
+        `<span class="n">${f.n_docs >= 1e6 ? (f.n_docs / 1e6).toFixed(1) + "M" : Math.round(f.n_docs / 1e3) + "k"}</span></button>`).join("");
+      $("#tabs").hidden = false;
+    }
+    const want = (new URLSearchParams(location.search).get("field") || "").toUpperCase();
+    setField(FIELDS.some(f => f.key === want) ? want : FIELDS[0].key, false);
   } catch (e) { $("#info").textContent = "The search server is offline at the moment."; }
 })();
+
+// ---- search fields (tabs): each has its own index, example texts and status line ----
+const EXAMPLES = {
+  CONSUMER: [
+    ["Coffee grinder", "A coffee machine that grinds beans on demand.\nA load cell weighs the ground coffee for exact dosing.\nThe grind size is adjusted automatically based on the measured extraction time."],
+    ["Dog leash", "A retractable dog leash with a cord wound on a spring-loaded reel in a handle.\nA brake button on the handle locks the cord at the current length.\nThe handle contains a light that switches on automatically in the dark."],
+    ["Ratchet screwdriver", "A ratchet screwdriver with interchangeable bits stored inside the handle.\nA switch on the handle selects forward, reverse or locked rotation.\nThe bit holder is magnetic so that bits and screws stay in place."],
+    ["Resealable bag", "A resealable food package made of flexible plastic film.\nThe package has a zipper closure along its top edge.\nA one-way valve lets gas escape without letting air in."],
+  ],
+  STEEL: [
+    ["High-strength steel sheet", "A method for producing a high-strength cold-rolled steel sheet.\nThe hot-rolled strip is coiled at a temperature below 550 °C.\nThe cold-rolled sheet is annealed above the Ac3 temperature and rapidly cooled to form martensite.\nThe sheet is then tempered to improve its ductility."],
+    ["Forging die cooling", "A hot forging die with cooling channels close to the die surface.\nCoolant flows through the channels between forging strokes.\nA sensor measures the die temperature and the coolant flow is adjusted to keep it constant."],
+    ["Strip flatness", "A rolling mill for steel strip with work rolls that can be bent and shifted axially.\nThe flatness of the strip is measured after the last stand.\nA controller adjusts roll bending and shifting to correct flatness deviations."],
+    ["Continuous casting", "A continuous casting mould for steel slabs with an electromagnetic stirrer.\nThe stirring force is adjusted based on the measured casting speed.\nThis reduces inclusions and centre segregation in the slab."],
+  ],
+};
+let FIELDS = [], FIELD = null, searched = false;
+const examples = () => EXAMPLES[FIELD] || EXAMPLES.CONSUMER;
+
+function renderExamples() {
+  $("#ph-ex").innerHTML = examples()[0][1].split("\n").map(s => `<span>${esc(s)}</span>`).join("");
+  $("#chips").innerHTML = examples().map((e, n) => `<button class="chip" data-i="${n}">${esc(e[0])}</button>`).join(" ");
+  fitBox();
+}
+
+function setField(key, rerun) {
+  const f = FIELDS.find(x => x.key === key);
+  if (!f) return;
+  FIELD = f.key;
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.key === FIELD)));
+  $("#info").textContent = `Searching ${f.n_docs.toLocaleString("en-US")} patent families in ${f.field}, published ${String(f.from).slice(0,4)} to ${String(f.to).slice(0,4)}.`;
+  renderExamples();
+  const u = new URL(location.href);  // shareable link to the field (the default field keeps a clean URL)
+  if (FIELD === FIELDS[0].key) u.searchParams.delete("field"); else u.searchParams.set("field", FIELD.toLowerCase());
+  history.replaceState(null, "", u);
+  if (rerun && searched && $("#q").value.trim()) run(); else if (rerun) $("#out").innerHTML = "";
+}
+$("#tabs").addEventListener("click", e => { const t = e.target.closest(".tab"); if (t && t.dataset.key !== FIELD) setField(t.dataset.key, true); });
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (b) { $("#q").value = examples()[+b.dataset.i][1]; fitBox(); run(); }
+});
 
 // The box grows to fit the example text (when empty) or the typed text, so nothing is hidden behind a scrollbar.
 function fitBox() {
@@ -286,8 +330,7 @@ function fitBox() {
 }
 $("#q").addEventListener("input", fitBox);
 window.addEventListener("resize", fitBox);
-fitBox();
-document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#q").value = b.dataset.ex; fitBox(); run(); });
+renderExamples();
 $("#go").onclick = run;
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run(); });
 $("#out").addEventListener("click", e => {
@@ -302,6 +345,8 @@ async function run() {
   const q = $("#q").value.trim();
   if (q.length < 3) { $("#q").focus(); return; }
   const body = { q, k: 20, rerank: $("#rerank").checked };
+  if (FIELD) body.field = FIELD;
+  searched = true;
   if ($("#before").value) body.before = +$("#before").value.replace(/-/g, "");
   if ($("#countries").value.trim()) body.countries = $("#countries").value.replace(/\s+/g, "");
   $("#go").disabled = true; $("#go").textContent = "Searching…";
