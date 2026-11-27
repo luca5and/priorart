@@ -118,6 +118,12 @@
   .lv.strong { color: var(--ok); background: var(--ok-bg); }
   .lv.partial { color: var(--mid); background: var(--mid-bg); }
   .lv.none { color: var(--no); background: var(--no-bg); }
+  .comp { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; font-size: 12px; }
+  .comp .cl { color: var(--muted); margin-right: 2px; }
+  .ce { padding: 1px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ce.match { color: var(--ok); background: var(--ok-bg); }
+  .ce.conflict { color: var(--no); background: var(--no-bg); }
+  .ce.missing { color: var(--muted); background: var(--accent-soft); }
   .empty { color: var(--muted); text-align: center; padding: 36px 0; }
 
   /* info sections */
@@ -224,7 +230,8 @@
         re-ranked with a model trained on patent examiners' citations.</p></div>
     <div><h4><span class="step">3</span>Compare</h4>
       <p>For the top results, each of your features is matched to the closest part of the patent's first
-        claim: strong match, partial match or not found.</p></div>
+        claim: strong match, partial match or not found. In steel and metal forming, element ranges in your
+        text (for example "C: 0.15–0.25%, Mn 2–3%") are also compared with the ranges each patent states.</p></div>
   </section>
 </main>
 
@@ -290,7 +297,7 @@ const EXAMPLES = {
     ["Resealable bag", "A resealable food package made of flexible plastic film.\nThe package has a zipper closure along its top edge.\nA one-way valve lets gas escape without letting air in."],
   ],
   STEEL: [
-    ["High-strength steel sheet", "A method for producing a high-strength cold-rolled steel sheet.\nThe hot-rolled strip is coiled at a temperature below 550 °C.\nThe cold-rolled sheet is annealed above the Ac3 temperature and rapidly cooled to form martensite.\nThe sheet is then tempered to improve its ductility."],
+    ["High-strength steel sheet", "A method for producing a high-strength cold-rolled steel sheet.\nThe steel contains, in mass %, C: 0.15–0.25%, Si: 1.0–2.0%, Mn: 2.0–3.0% and Al: 0.5% or less.\nThe hot-rolled strip is coiled at a temperature below 550 °C.\nThe cold-rolled sheet is annealed above the Ac3 temperature and rapidly cooled to form martensite.\nThe sheet is then tempered to improve its ductility."],
     ["Forging die cooling", "A hot forging die with cooling channels close to the die surface.\nCoolant flows through the channels between forging strokes.\nA sensor measures the die temperature and the coolant flow is adjusted to keep it constant."],
     ["Strip flatness", "A rolling mill for steel strip with work rolls that can be bent and shifted axially.\nThe flatness of the strip is measured after the last stand.\nA controller adjusts roll bending and shifting to correct flatness deviations."],
     ["Continuous casting", "A continuous casting mould for steel slabs with an electromagnetic stirrer.\nThe stirring force is adjusted based on the measured casting speed.\nThis reduces inclusions and centre segregation in the slab."],
@@ -369,6 +376,17 @@ async function run() {
   $("#go").disabled = false; $("#go").textContent = "Search";
 }
 
+function fmtRange(lo, hi) {
+  const f = v => String(+v.toFixed(4));
+  return lo === hi ? f(lo) + "%" : lo === 0 ? "≤" + f(hi) + "%" : hi >= 100 ? "≥" + f(lo) + "%" : f(lo) + "–" + f(hi) + "%";
+}
+function compRow(rows) {
+  if (!rows || !rows.some(r => r.status !== "missing")) return "";
+  const t = { match: "overlaps your range", conflict: "outside your range", missing: "not stated" };
+  return `<div class="comp" title="Element ranges in this patent compared with the ranges in your text"><span class="cl">Composition:</span>` +
+    rows.map(r => `<span class="ce ${r.status}" title="${r.el}: ${t[r.status]}">${esc(r.el)} ${r.status === "missing" ? "–" : fmtRange(r.lo, r.hi)}${r.status === "conflict" ? " ✗" : r.status === "match" ? " ✓" : ""}</span>`).join("") + `</div>`;
+}
+
 function render(res) {
   if (!res.results.length) { $("#out").innerHTML = '<p class="empty">No results with these filters.</p>'; return; }
   let h = `<div class="meta">${res.results.length} closest patent families · ${(res.ms / 1000).toFixed(1)} s</div>`;
@@ -384,6 +402,7 @@ function render(res) {
       <div class="facts"><span class="pn">${esc(d.id)}</span><span>Published ${fmtDate(d.first_pub)}</span>
         <span>Priority ${fmtDate(d.prio_date)}</span>${d.assignee.length ? `<span>${esc(d.assignee.join(", "))}</span>` : ""}
         <span>${d.n_members} family member${d.n_members > 1 ? "s" : ""}</span></div>
+      ${compRow(d.composition)}
       <p class="abs" id="a${n}">${esc(d.abstract)}</p>
       <div class="tools">
         <button class="tool" data-for="a${n}" aria-expanded="false">Full abstract</button>`;
