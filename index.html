@@ -7,17 +7,18 @@
 <meta name="description" content="Free prior-art search. Describe an invention in plain English and find earlier patents with the same features.">
 <style>
   :root {
-    --bg: #ffffff; --surface: #f8fafc; --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --line-strong: #cbd5e1;
-    --accent: #1d4ed8; --accent-hover: #1e40af; --accent-soft: #eff6ff; --on-accent: #ffffff;
-    --ok: #047857; --ok-bg: #ecfdf5; --mid: #b45309; --mid-bg: #fffbeb; --no: #64748b; --no-bg: #f1f5f9;
-    --panel-line: #93b4f0; --panel-shadow: 0 8px 28px -10px rgba(29,78,216,.28);
+    /* neutral black-and-white palette; colour only where it carries meaning (match levels) */
+    --bg: #ffffff; --surface: #fafafa; --text: #111111; --muted: #666666; --line: #ebebeb; --line-strong: #d4d4d4;
+    --accent: #111111; --accent-hover: #000000; --accent-soft: #f1f1f1; --on-accent: #ffffff; --link-muted: #444444;
+    --ok: #15803d; --ok-bg: #effaf2; --mid: #a16207; --mid-bg: #fdf8e8; --no: #737373; --no-bg: #f4f4f4;
+    --panel-line: #cfcfcf; --panel-shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 30px -14px rgba(0,0,0,.18);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #94a3b8; --line: #1f2937; --line-strong: #334155;
-      --accent: #60a5fa; --accent-hover: #93c5fd; --accent-soft: #172554; --on-accent: #0b1120;
-      --ok: #34d399; --ok-bg: #052e22; --mid: #fbbf24; --mid-bg: #2d2006; --no: #94a3b8; --no-bg: #1e293b;
-      --panel-line: #2b4a8a; --panel-shadow: 0 8px 28px -12px rgba(0,0,0,.6);
+      --bg: #0a0a0a; --surface: #131313; --text: #ededed; --muted: #a0a0a0; --line: #242424; --line-strong: #3a3a3a;
+      --accent: #ededed; --accent-hover: #ffffff; --accent-soft: #222222; --on-accent: #0a0a0a; --link-muted: #c4c4c4;
+      --ok: #4ade80; --ok-bg: #0d2416; --mid: #facc15; --mid-bg: #2a2207; --no: #a0a0a0; --no-bg: #1c1c1c;
+      --panel-line: #3a3a3a; --panel-shadow: 0 10px 30px -14px rgba(0,0,0,.7);
     }
   }
   * { box-sizing: border-box; }
@@ -83,7 +84,7 @@
   .result { display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; padding: 18px 0; border-bottom: 1px solid var(--line); }
   .rank { font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 2px; text-align: right; }
   .result h3 { margin: 0; font-size: 16.5px; line-height: 1.35; font-weight: 600; }
-  .result h3 a { color: var(--accent); }
+  .result h3 a { color: var(--text); text-underline-offset: 3px; }
   .facts { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; color: var(--muted); margin: 4px 0 8px; }
   .facts .pn { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
   .abs { margin: 0; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -93,7 +94,7 @@
   .match.hi { background: var(--ok-bg); color: var(--ok); }
   .match.md { background: var(--mid-bg); color: var(--mid); }
   .tools { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 10px; }
-  .tool { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+  .tool { font: inherit; font-size: 13px; color: var(--link-muted); background: none; border: 0; padding: 0; cursor: pointer; }
   .tool:hover { text-decoration: underline; }
   .tool[aria-expanded=true]::after { content: " \25B4"; }
   .tool[aria-expanded=false]::after { content: " \25BE"; }
@@ -117,7 +118,7 @@
   .how p { margin: 0; font-size: 14px; color: var(--muted); }
   .step { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%;
     background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; margin-right: 8px; }
-  footer { margin-top: 56px; background: var(--surface); border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer { margin-top: 56px; background: var(--bg); border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   footer .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding-top: 32px; padding-bottom: 32px; }
   footer h5 { margin: 0 0 6px; font-size: 13px; color: var(--text); }
   footer p { margin: 0; }
