@@ -125,6 +125,14 @@
   .ce.conflict { color: var(--no); background: var(--no-bg); }
   .ce.missing { color: var(--muted); background: var(--accent-soft); }
   .empty { color: var(--muted); text-align: center; padding: 36px 0; }
+  .summary { margin: 16px 0 4px; padding: 14px 16px 6px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); }
+  .summary h3 { margin: 0 0 4px; font-size: 15.5px; }
+  .summary .verdict { margin: 0 0 8px; font-size: 14px; }
+  .summary .note { margin: 8px 0 6px; font-size: 12.5px; color: var(--muted); }
+  .summary table { background: var(--bg); }
+  .summary td.w { font-size: 13px; color: var(--muted); }
+  .summary td.w a { color: var(--text); font-weight: 600; text-underline-offset: 2px; }
+  .result:target { background: var(--accent-soft); }
 
   /* info sections */
   .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin: 64px 0 0; padding: 32px 0 0; border-top: 1px solid var(--line); }
@@ -387,9 +395,44 @@ function compRow(rows) {
     rows.map(r => `<span class="ce ${r.status}" title="${r.el}: ${t[r.status]}">${esc(r.el)} ${r.status === "missing" ? "–" : fmtRange(r.lo, r.hi)}${r.status === "conflict" ? " ✗" : r.status === "match" ? " ✓" : ""}</span>`).join("") + `</div>`;
 }
 
+function summaryBox(res) {
+  const s = res.summary;
+  if (!s || !s.rows.length) return "";
+  const links = rs => rs.map(r => `<a href="#r${r}">#${r}</a>`).join(", ");
+  const known = r => r.level === "none" && r.elsewhere && r.elsewhere.length;
+  const missing = s.rows.filter(r => r.level === "none" && !known(r)).length, partly = s.rows.filter(r => r.level === "partial").length;
+  const elsewhere = s.rows.filter(known).length;
+  // the single result that covers most of the features
+  let best = null;
+  for (const d of res.results) if (d.features) {
+    const c = d.features.rows.filter(r => r.level !== "none").length;
+    if (!best || c > best.c) best = { c, n: d.rank };
+  }
+  const n = s.rows.length;
+  let verdict = missing
+    ? `<strong>${missing} of ${n} feature${n > 1 ? "s" : ""} not found</strong> in earlier patents, not even when searched on ${missing > 1 ? "their" : "its"} own. ${missing > 1 ? "These may be" : "This may be"} what is new about your invention.`
+    : elsewhere ? `<strong>Every feature appears in some earlier patent.</strong>`
+    : partly ? `<strong>All features were found at least partly</strong> in the top ${s.top} results; ${partly} only partly.`
+    : `<strong>All ${n} features were found</strong> in earlier patents in the top ${s.top} results.`;
+  if (elsewhere) verdict += ` ${elsewhere} feature${elsewhere > 1 ? "s are" : " is"} known from other patents, but not together with your other features in the top ${s.top}: the combination may be new.`;
+  if (best && best.c) verdict += ` Closest single patent: <a href="#r${best.n}">#${best.n}</a>, with ${best.c} of ${n} features.`;
+  let h = `<section class="summary" aria-label="Feature summary"><h3>Your features in the top ${s.top} results</h3><p class="verdict">${verdict}</p>
+    <table><thead><tr><th>Your feature</th><th>Best match</th><th>Found in</th></tr></thead><tbody>`;
+  for (const r of s.rows) {
+    const lv = known(r) ? "Elsewhere" : r.level === "none" ? "Not found" : r.level === "strong" ? "Strong" : "Partial";
+    const cls = known(r) ? "partial" : r.level;
+    const where = known(r) ? `Not in the top ${s.top}. Searched on its own, found in: ` + r.elsewhere.slice(0, 3).map(e =>
+        `<a href="${esc(gp(e.id))}" target="_blank" rel="noopener" title="${esc(clip(e.element))}">${esc(e.id)}</a> ${esc(clip(e.title, 60))}`).join("; ")
+      : r.level === "none" ? "Not found, not even when searched on its own" : (r.strong.length ? links(r.strong) : "") +
+      (r.partial.length ? `${r.strong.length ? "; partly " : "Partly "}${links(r.partial.slice(0, 6))}${r.partial.length > 6 ? " …" : ""}` : "");
+    h += `<tr><td class="f">${esc(res.features[r.feature])}</td><td class="l"><span class="lv ${cls}">${lv}</span></td><td class="w">${where}</td></tr>`;
+  }
+  return h + `</tbody></table><p class="note">Compared with the first claim of each result. A patent's description can still disclose a feature that its claim lacks, so this is a starting point, not a legal novelty opinion.</p></section>`;
+}
+
 function render(res) {
   if (!res.results.length) { $("#out").innerHTML = '<p class="empty">No results with these filters.</p>'; return; }
-  let h = `<div class="meta">${res.results.length} closest patent families · ${(res.ms / 1000).toFixed(1)} s</div>`;
+  let h = summaryBox(res) + `<div class="meta">${res.results.length} closest patent families · ${(res.ms / 1000).toFixed(1)} s</div>`;
   for (const d of res.results) {
     const f = d.features, n = d.rank;
     let badge = "";
@@ -397,7 +440,7 @@ function render(res) {
       const pct = Math.round(f.coverage * 100);
       badge = ` <span class="match ${pct >= 67 ? "hi" : pct >= 34 ? "md" : ""}" title="How many of your features were found in claim 1">${pct}% feature match</span>`;
     }
-    h += `<article class="result"><div class="rank">${n}</div><div>
+    h += `<article class="result" id="r${n}"><div class="rank">${n}</div><div>
       <h3><a href="${esc(gp(d.id))}" target="_blank" rel="noopener">${esc(d.title) || esc(d.id)}</a>${badge}</h3>
       <div class="facts"><span class="pn">${esc(d.id)}</span><span>Published ${fmtDate(d.first_pub)}</span>
         <span>Priority ${fmtDate(d.prio_date)}</span>${d.assignee.length ? `<span>${esc(d.assignee.join(", "))}</span>` : ""}
